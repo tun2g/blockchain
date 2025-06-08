@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package blockchain;
+option go_package = "github.com/blockchain/pkg/p2p";
+
+// Transaction message
+message Transaction {
+    bytes sender = 1;
+    bytes receiver = 2;
+    double amount = 3;
+    int64 timestamp = 4;
+    bytes signature = 5;
+}
+
+// Block message
+message Block {
+    int32 index = 1;
+    int64 timestamp = 2;
+    repeated Transaction transactions = 3;
+    bytes merkle_root = 4;
+    bytes previous_hash = 5;
+    bytes current_block_hash = 6;
+    int32 nonce = 7;
+}
+
+// Vote message for consensus
+message Vote {
+    string node_id = 1;
+    bytes block_hash = 2;
+    bool approve = 3;
+    int64 timestamp = 4;
+}
+
+// Request messages
+message SendTransactionRequest {
+    Transaction transaction = 1;
+}
+
+message SendTransactionResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message ProposeBlockRequest {
+    Block block = 1;
+    string proposer_id = 2;
+}
+
+message ProposeBlockResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message VoteRequest {
+    Vote vote = 1;
+}
+
+message VoteResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetBlockByHeightRequest {
+    int32 height = 1;
+}
+
+message GetBlockByHeightResponse {
+    Block block = 1;
+    bool found = 2;
+}
+
+message GetLatestBlockRequest {}
+
+message GetLatestBlockResponse {
+    Block block = 1;
+    bool found = 2;
+}
+
+message GetBlocksFromHeightRequest {
+    int32 start_height = 1;
+}
+
+message GetBlocksFromHeightResponse {
+    repeated Block blocks = 1;
+}
+
+message GetChainInfoRequest {}
+
+message GetChainInfoResponse {
+    int32 latest_height = 1;
+    bytes latest_block_hash = 2;
+    int64 latest_block_timestamp = 3;
+    int32 pending_transactions = 4;
+}
+
+message SyncRequest {
+    string node_id = 1;
+    int32 current_height = 2;
+}
+
+message SyncResponse {
+    repeated Block blocks = 1;
+    bool success = 2;
+    string message = 3;
+}
+
+// Blockchain service definition
+service BlockchainService {
+    // Transaction operations
+    rpc SendTransaction(SendTransactionRequest) returns (SendTransactionResponse);
+    
+    // Consensus operations
+    rpc ProposeBlock(ProposeBlockRequest) returns (ProposeBlockResponse);
+    rpc Vote(VoteRequest) returns (VoteResponse);
+    
+    // Block operations
+    rpc GetBlockByHeight(GetBlockByHeightRequest) returns (GetBlockByHeightResponse);
+    rpc GetLatestBlock(GetLatestBlockRequest) returns (GetLatestBlockResponse);
+    rpc GetBlocksFromHeight(GetBlocksFromHeightRequest) returns (GetBlocksFromHeightResponse);
+    
+    // Chain operations
+    rpc GetChainInfo(GetChainInfoRequest) returns (GetChainInfoResponse);
+    rpc Sync(SyncRequest) returns (SyncResponse);
+} 

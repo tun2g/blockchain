@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  node1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ID: node1
+      PEERS: "node2:50051,node3:50051"
+      IS_LEADER: "true"
+      LISTEN_ADDR: ":50051"
+      DATA_DIR: "/app/data"
+    ports:
+      - "50051:50051"
+      - "8080:8080"
+    volumes:
+      - node1_data:/app/data
+    networks:
+      - blockchain_net
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "50051"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  node2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ID: node2
+      PEERS: "node1:50051,node3:50051"
+      IS_LEADER: "false"
+      LISTEN_ADDR: ":50051"
+      DATA_DIR: "/app/data"
+    ports:
+      - "50052:50051"
+      - "8091:8080"
+    volumes:
+      - node2_data:/app/data
+    networks:
+      - blockchain_net
+    depends_on:
+      - node1
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "50051"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  node3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ID: node3
+      PEERS: "node1:50051,node2:50051"
+      IS_LEADER: "false"
+      LISTEN_ADDR: ":50051"
+      DATA_DIR: "/app/data"
+    ports:
+      - "50053:50051"
+      - "8092:8080"
+    volumes:
+      - node3_data:/app/data
+    networks:
+      - blockchain_net
+    depends_on:
+      - node1
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "50051"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  node1_data:
+  node2_data:
+  node3_data:
+
+networks:
+  blockchain_net:
+    driver: bridge 
