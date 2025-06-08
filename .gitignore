@@ -1,2 +1,4 @@
 instructions/raw_requirements.md
 .env
+data/*
+wallets/*
